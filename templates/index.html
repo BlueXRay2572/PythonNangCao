@@ -1,0 +1,121 @@
+{% extends "base.html" %}
+
+{% block title %}Trang chủ - Dashboard{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-3">
+        <div class="stat-card success">
+            <h4><i class="fas fa-box-open"></i> Tổng sản phẩm</h4>
+            <h2>{{ total_products }}</h2>
+            <small>Tổng số loại sản phẩm</small>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="stat-card info">
+            <h4><i class="fas fa-dollar-sign"></i> Tổng giá trị kho</h4>
+            <h2>{{ "{:,.0f} ₫".format(total_value) }}</h2>
+            <small>Dựa trên giá và số lượng</small>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="stat-card warning">
+            <h4><i class="fas fa-truck"></i> Nhà cung cấp</h4>
+            <h2>{{ suppliers }}</h2>
+            <small>Đối tác đang hoạt động</small>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="stat-card">
+            <h4><i class="fas fa-building"></i> Kho hàng</h4>
+            <h2>{{ warehouses }}</h2>
+            <small>Số lượng kho</small>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-md-5">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h5><i class="fas fa-exchange-alt"></i> Giao dịch nhanh (Nhập/Xuất)</h5>
+            </div>
+            <div class="card-body">
+                <form action="{{ url_for('add_transaction') }}" method="POST">
+                    <div class="mb-3">
+                        <label for="product_id" class="form-label">Sản phẩm</label>
+                        <select class="form-select" id="product_id" name="product_id" required>
+                            <option value="">-- Chọn sản phẩm --</option>
+                            {% for p in products %}
+                            <option value="{{ p.id }}">{{ p.name }} (SKU: {{ p.sku }})</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Loại giao dịch</label>
+                        <div>
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="radio" name="type" id="type_in" value="IN" checked>
+                                <label class="form-check-label" for="type_in">Nhập kho</label>
+                            </div>
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="radio" name="type" id="type_out" value="OUT">
+                                <label class="form-check-label" for="type_out">Xuất kho</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="quantity" class="form-label">Số lượng</label>
+                        <input type="number" class="form-control" id="quantity" name="quantity" min="1" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="notes" class="form-label">Ghi chú</label>
+                        <textarea class="form-control" id="notes" name="notes" rows="2"></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="fas fa-check"></i> Xác nhận giao dịch
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-7">
+        <div class="card">
+            <div class="card-header bg-danger text-white">
+                <h5><i class="fas fa-exclamation-triangle"></i> Cảnh báo tồn kho thấp</h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>SKU</th>
+                                <th>Tên sản phẩm</th>
+                                <th>Hiện có</th>
+                                <th>Tối thiểu</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% if low_stock %}
+                                {% for item in low_stock %}
+                                <tr class="table-danger">
+                                    <td>{{ item.sku }}</td>
+                                    <td>{{ item.name }}</td>
+                                    <td><strong>{{ item.quantity }}</strong></td>
+                                    <td>{{ item.min_stock }}</td>
+                                </tr>
+                                {% endfor %}
+                            {% else %}
+                                <tr>
+                                    <td colspan="4" class="text-center">Không có sản phẩm nào dưới mức tồn kho tối thiểu.</td>
+                                </tr>
+                            {% endif %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
